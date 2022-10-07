@@ -1,36 +1,57 @@
-import { useState } from "react"
+import { useFormik } from "formik";
+import * as Yup from "yup";
+
+const bookValidationSchema = Yup.object({
+    title: Yup.string().required("Título é obrigatório!"),
+    author: Yup.string().required("Autor é obrigatório!"),
+    genre: Yup.string().required("Gênero é obrigatório!"),
+    finishedAt: Yup.date().required("Data de finalização é obrigatória"),
+    grade: Yup.number().required("Nota é obrigatória"),
+});
 
 const BookForm = ({ onSave, onClose }) => {
-    const [title, setTitle] = useState('')
-    const [author, setAuthor] = useState('')
-    const [genre, setGenre] = useState('')
-    const [finishedAt, setFinishedAt] = useState('')
-    const [grade, setGrade] = useState('')
+    const { errors, touched, handleBlur, handleChange, handleSubmit } = useFormik(
+        {
+            initialValues: {
+                title: "",
+                author: "",
+                genre: "",
+                finishedAt: "",
+                grade: "",
+            },
+            validationSchema: bookValidationSchema,
+            validateOnChange: false,
+            validateOnBlur: true,
+            onSubmit: (values) => save(values),
+        }
+    );
 
-    const save = () => {
-        onSave({
-            title,
-            author,
-            genre,
-            finishedAt,
-            grade
-        })
-    }
+    const save = (book) => {
+        onSave(book);
+    };
 
     return (
-        <>
+        <form onSubmit={handleSubmit}>
             Título: <br />
-            <input type="text" onChange={event => setTitle(event.target.value)} />
-
-            <br /><br />
-
+            <input
+                type="text"
+                name="title"
+                onBlur={handleBlur}
+                onChange={handleChange}
+            />
+            <div>{touched.title ? errors.title : null}</div>
+            <br />
             Autor: <br />
-            <input type="text" onChange={event => setAuthor(event.target.value)}/>
-
-            <br /><br />
-
+            <input
+                type="text"
+                name="author"
+                onBlur={handleBlur}
+                onChange={handleChange}
+            />
+            <div>{touched.author ? errors.author : null}</div>
+            <br />
             Gênero: <br />
-            <select onChange={event => setGenre(event.target.value)}>
+            <select name="genre" onChange={handleChange} onBlur={handleBlur}>
                 <option value=""></option>
                 <option value="Ficção">Ficção</option>
                 <option value="Ficção Científica">Ficção Científica</option>
@@ -39,22 +60,31 @@ const BookForm = ({ onSave, onClose }) => {
                 <option value="HQ">HQ</option>
                 <option value="Não Ficção">Não Ficção</option>
             </select>
-
-            <br /><br />
-
+            <div>{touched.genre ? errors.genre : null}</div>
+            <br />
             Finalizado em: <br />
-            <input type="date" onChange={event => setFinishedAt(event.target.value)}/>
-
-            <br /><br />
-
+            <input
+                type="date"
+                name="finishedAt"
+                onChange={handleChange}
+                onBlur={handleBlur}
+            />
+            <div>{touched.finishedAt ? errors.finishedAt : null}</div>
+            <br />
             Nota: <br />
-            <input type="number" onChange={event => setGrade(event.target.value)}/>
+            <input
+                type="number"
+                name="grade"
+                onChange={handleChange}
+                onBlur={handleBlur}
+            />
+            <div>{touched.grade ? errors.grade : null}</div>
+            <br />
+            <input type="submit" value="Salvar" />
+            &nbsp;
+            <input type="button" value="Cancelar" onClick={onClose} />
+        </form>
+    );
+};
 
-            <br /><br />
-            <input type="button" value="Salvar" onClick={save}/>&nbsp;
-            <input type="button" value="Cancelar" onClick={onClose}/>
-        </>
-    )
-}
-
-export default BookForm
+export default BookForm;
